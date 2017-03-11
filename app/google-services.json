@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "643113543454",
+    "firebase_url": "https://brinquedoteca-d1d94.firebaseio.com",
+    "project_id": "brinquedoteca-d1d94",
+    "storage_bucket": "brinquedoteca-d1d94.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:643113543454:android:de2f05d1bca052c0",
+        "android_client_info": {
+          "package_name": "br.com.marks.brinquedoteca"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "643113543454-vdba6nk78n8li0kkqrplvo594flp32hu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.marks.brinquedoteca",
+            "certificate_hash": "a2a44c3e69913663c19f48221b19bf2a29cfc1fe"
+          }
+        },
+        {
+          "client_id": "643113543454-dviam49tfvg3c5n6o9s2v5258upm9rm9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvyOL-OIjnwRUrU4kxajzn6dbKxEYl9Sk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "643113543454-dviam49tfvg3c5n6o9s2v5258upm9rm9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

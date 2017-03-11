@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Brinquedoteca</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Senha</string>
+    <string name="action_sign_in">Login/Cadastrar</string>
+    <string name="action_sign_in_short">Login</string>
+    <string name="error_invalid_email">Este endereço de e-mail é inválido</string>
+    <string name="error_invalid_password">A senha é muito pequena</string>
+    <string name="error_incorrect_password">A senha está errada</string>
+    <string name="error_field_required">Este campo é necessário</string>
+    <string name="permission_rationale">"Acesso aos contatos é necessário para validação do e-mail"</string>
+    <string name="matricula">Matricula</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="title_principal_list">Principais</string>
+    <string name="title_principal_detail">Principal Detail</string>
+</resources>
