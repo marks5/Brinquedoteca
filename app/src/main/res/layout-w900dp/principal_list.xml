@@ -3,8 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
     android:baselineAligned="false"
     android:divider="?android:attr/dividerHorizontal"
     android:orientation="horizontal"
@@ -17,17 +15,17 @@
     
     -->
 
-    <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    <android.support.design.widget.NavigationView
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/principal_list"
+        android:id="@+id/navigation_view"
         android:name="br.com.marks.brinquedoteca.activity.PrincipalListFragment"
         android:layout_width="@dimen/item_width"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
         tools:context="br.com.marks.brinquedoteca.a.PrincipalListActivity"
-        tools:listitem="@layout/principal_list_content" />
+        app:menu="@menu/menu_brinquedoteca"
+        app:headerLayout="@layout/layout_header_brinquedoteca"/>
 
     <FrameLayout
         android:id="@+id/principal_detail_container"

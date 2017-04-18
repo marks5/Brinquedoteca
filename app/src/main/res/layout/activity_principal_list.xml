@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    android:id="@+id/drawer_layout"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:design="http://schemas.android.com/apk/res-auto"
+    >
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -26,8 +34,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <include layout="@layout/principal_list" />
     </FrameLayout>
 
     <android.support.design.widget.FloatingActionButton
@@ -40,3 +46,20 @@
 
 
 </android.support.design.widget.CoordinatorLayout>
+
+    <android.support.design.widget.NavigationView
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        android:background="#FFF"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/navigation_view"
+        android:name="br.com.marks.brinquedoteca.activity.PrincipalListFragment"
+        android:layout_width="@dimen/item_width"
+        android:layout_height="match_parent"
+        app:layoutManager="LinearLayoutManager"
+        tools:context="br.com.marks.brinquedoteca.a.PrincipalListActivity"
+        app:menu="@menu/menu_brinquedoteca"
+        app:headerLayout="@layout/layout_header_brinquedoteca"/>
+
+</android.support.v4.widget.DrawerLayout>

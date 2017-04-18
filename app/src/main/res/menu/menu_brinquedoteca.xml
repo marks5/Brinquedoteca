@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item android:title="@string/inicio"
+            android:id="@+id/menu_inicio"/>
+        <item android:title="@string/meu_perfil"
+            android:id="@+id/menu_perfil"/>
+        <item android:title="@string/crian_as"
+            android:id="@+id/menu_criancas"/>
+        <item android:title="@string/contato"
+            android:id="@+id/contato"/>
+        <item android:title="@string/sobre"
+            android:id="@+id/sobre"/>
+
+        </group>
+
+</menu>
