@@ -1,0 +1,36 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:baselineAligned="false"
+    android:divider="?android:attr/dividerHorizontal"
+    android:orientation="horizontal"
+    android:showDividers="middle"
+    tools:context="br.com.marks.brinquedoteca.a.core.PrincipalListActivity">
+
+    <!--
+    This layout is a two-pane layout for the Principais
+    master/detail flow.
+    
+    -->
+
+    <android.support.design.widget.NavigationView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/navigation_view"
+        android:name="br.com.marks.brinquedoteca.activity.PrincipalListFragment"
+        android:layout_width="@dimen/item_width"
+        android:layout_height="match_parent"
+        app:layoutManager="LinearLayoutManager"
+        tools:context="br.com.marks.brinquedoteca.a.core.PrincipalListActivity"
+        app:menu="@menu/menu_brinquedoteca"
+        app:headerLayout="@layout/layout_header_brinquedoteca"/>
+
+    <FrameLayout
+        android:id="@+id/principal_detail_container"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="3" />
+
+</LinearLayout>

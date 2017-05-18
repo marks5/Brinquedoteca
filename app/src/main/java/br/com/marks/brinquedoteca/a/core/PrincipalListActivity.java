@@ -36,7 +36,9 @@ public class PrincipalListActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setTitle(getTitle());
+        if(toolbar!=null) {
+            toolbar.setTitle(getTitle());
+        }
 
         context = getApplicationContext();
 
