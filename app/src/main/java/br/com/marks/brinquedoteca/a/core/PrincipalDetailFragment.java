@@ -1,4 +1,4 @@
-package br.com.marks.brinquedoteca.a;
+package br.com.marks.brinquedoteca.a.core;
 
 import android.app.Activity;
 import android.support.design.widget.CollapsingToolbarLayout;

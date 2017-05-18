@@ -10,5 +10,5 @@
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context="br.com.marks.brinquedoteca.a.PrincipalListActivity"
+    tools:context="br.com.marks.brinquedoteca.a.core.PrincipalListActivity"
     tools:listitem="@layout/principal_list_content" />

@@ -13,7 +13,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".a.Login">
+        <activity android:name=".a.core.Login">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,18 +21,23 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".a.PrincipalListActivity"
+            android:name=".a.core.PrincipalListActivity"
             android:label="@string/title_principal_list"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
         <activity
-            android:name=".a.PrincipalDetailActivity"
+            android:name=".a.core.PrincipalDetailActivity"
             android:label="@string/title_principal_detail"
-            android:parentActivityName=".a.PrincipalListActivity"
+            android:parentActivityName=".a.core.PrincipalListActivity"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="br.com.marks.brinquedoteca.a.PrincipalListActivity" />
+                android:value="br.com.marks.brinquedoteca.a.core.PrincipalListActivity" />
         </activity>
+        <activity android:name=".a.activity.TelaInicialActivity" />
+        <activity android:name=".a.activity.TelaPerfilActivity" />
+        <activity android:name=".a.activity.TelaCriancasActivity" />
+        <activity android:name=".a.activity.TelaContatoActivity" />
+        <activity android:name=".a.activity.TelaSobreActivity"></activity>
     </application>
 
 </manifest>
