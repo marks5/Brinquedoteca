@@ -9,7 +9,7 @@ public class Crianca {
     //Basic
     public String nome; //Nome Completo
     public Integer idade; //Numericos simples: 5/6/7/8 anos
-    public Integer identidade;
+    public String identidade;
 
     //IMGUR
     public String urlImagem;
