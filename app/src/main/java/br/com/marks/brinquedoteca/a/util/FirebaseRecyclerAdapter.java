@@ -1,312 +1,242 @@
 package br.com.marks.brinquedoteca.a.util;
 
-import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
+/*
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import android.util.Log;
-import android.view.ViewGroup;
+        import android.support.annotation.LayoutRes;
+        import android.support.v7.widget.RecyclerView;
+        import android.util.Log;
+        import android.view.LayoutInflater;
+        import android.view.View;
+        import android.view.ViewGroup;
 
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.Query;
+        import com.google.firebase.database.DataSnapshot;
+        import com.google.firebase.database.DatabaseError;
+        import com.google.firebase.database.DatabaseReference;
+        import com.google.firebase.database.Query;
+import br.com.marks.brinquedoteca.a.util.database.*;
 
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
+        import java.lang.reflect.Constructor;
+        import java.lang.reflect.InvocationTargetException;
 
 /**
- * Created by Matteo on 24/08/2015.
- * Updated on 19/06/2016 following https://firebase.google.com/support/guides/firebase-android.
+ * This class is a generic way of backing an RecyclerView with a Firebase location.
+ * It handles all of the child events at the given Firebase location. It marshals received data into the given
+ * class type.
  * <p>
- * This class is a generic way of backing an Android RecyclerView with a Firebase location.
- * It handles all of the child events at the given Firebase location.
- * It marshals received data into the given class type.
- * Extend this class and provide an implementation of the abstract methods, which will notify when
- * the adapter list changes.
+ * To use this class in your app, subclass it passing in all required parameters and implement the
+ * populateViewHolder method.
  * <p>
- * This class also simplifies the management of configuration change (e.g.: device rotation)
- * allowing the restore of the list.
+ * <pre>
+ *     private static class ChatMessageViewHolder extends RecyclerView.ViewHolder {
+ *         TextView messageText;
+ *         TextView nameText;
  *
- * @param <T> The class type to use as a model for the data contained in the children of the
- *            given Firebase location
+ *         public ChatMessageViewHolder(View itemView) {
+ *             super(itemView);
+ *             nameText = (TextView)itemView.findViewById(android.R.id.text1);
+ *             messageText = (TextView) itemView.findViewById(android.R.id.text2);
+ *         }
+ *     }
+ *
+ *     FirebaseRecyclerAdapter<ChatMessage, ChatMessageViewHolder> adapter;
+ *     DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+ *
+ *     RecyclerView recycler = (RecyclerView) findViewById(R.id.messages_recycler);
+ *     recycler.setHasFixedSize(true);
+ *     recycler.setLayoutManager(new LinearLayoutManager(this));
+ *
+ *     adapter = new FirebaseRecyclerAdapter<ChatMessage, ChatMessageViewHolder>(
+ *           ChatMessage.class, android.R.layout.two_line_list_item, ChatMessageViewHolder.class, ref) {
+ *         public void populateViewHolder(ChatMessageViewHolder chatMessageViewHolder,
+ *                                        ChatMessage chatMessage,
+ *                                        int position) {
+ *             chatMessageViewHolder.nameText.setText(chatMessage.getName());
+ *             chatMessageViewHolder.messageText.setText(chatMessage.getMessage());
+ *         }
+ *     };
+ *     recycler.setAdapter(mAdapter);
+ * </pre>
+ * <p>
+ * To avoid Context leaks, make sure you invoke {@link #cleanup() cleanup}
+ * <p>
+ *
+ * @param <T>  The Java class that maps to the type of objects stored in the Firebase location.
+ * @param <VH> The ViewHolder class that contains the Views in the layout that is shown for each object.
  */
-public abstract class FirebaseRecyclerAdapter<ViewHolder extends RecyclerView.ViewHolder, T> extends RecyclerView.Adapter<ViewHolder> {
+public abstract class FirebaseRecyclerAdapter<T, VH extends RecyclerView.ViewHolder>
+        extends RecyclerView.Adapter<VH> {
+    private static final String TAG = "FirebaseRecyclerAdapter";
 
-    private Query mQuery;
-    private ArrayList<T> mItems;
-    private ArrayList<String> mKeys;
+    private FirebaseArray mSnapshots;
+    private Class<T> mModelClass;
+    protected Class<VH> mViewHolderClass;
+    protected int mModelLayout;
 
-    /**
-     * @param query The Firebase location to watch for data changes.
-     *              Can also be a slice of a location, using some combination of
-     *              <code>limit()</code>, <code>startAt()</code>, and <code>endAt()</code>.
-     */
-    public FirebaseRecyclerAdapter(Query query) {
-        this(query, null, null);
+    FirebaseRecyclerAdapter(Class<T> modelClass,
+                            @LayoutRes int modelLayout,
+                            Class<VH> viewHolderClass,
+                            FirebaseArray snapshots) {
+        mModelClass = modelClass;
+        mModelLayout = modelLayout;
+        mViewHolderClass = viewHolderClass;
+        mSnapshots = snapshots;
+
+        mSnapshots.setOnChangedListener(new ChangeEventListener() {
+            @Override
+            public void onChildChanged(EventType type, int index, int oldIndex) {
+                FirebaseRecyclerAdapter.this.onChildChanged(type, index, oldIndex);
+            }
+
+            @Override
+            public void onDataChanged() {
+                FirebaseRecyclerAdapter.this.onDataChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                FirebaseRecyclerAdapter.this.onCancelled(error);
+            }
+        });
     }
 
     /**
-     * @param query The Firebase location to watch for data changes.
-     *              Can also be a slice of a location, using some combination of
-     *              <code>limit()</code>, <code>startAt()</code>, and <code>endAt()</code>.
-     * @param items List of items that will load the adapter before starting the listener.
-     *              Generally null or empty, but this can be useful when dealing with a
-     *              configuration change (e.g.: reloading the adapter after a device rotation).
-     *              Be careful: keys must be coherent with this list.
-     * @param keys  List of keys of items that will load the adapter before starting the listener.
-     *              Generally null or empty, but this can be useful when dealing with a
-     *              configuration change (e.g.: reloading the adapter after a device rotation).
-     *              Be careful: items must be coherent with this list.
+     * @param modelClass      Firebase will marshall the data at a location into
+     *                        an instance of a class that you provide
+     * @param modelLayout     This is the layout used to represent a single item in the list.
+     *                        You will be responsible for populating an instance of the corresponding
+     *                        view with the data from an instance of modelClass.
+     * @param viewHolderClass The class that hold references to all sub-views in an instance modelLayout.
+     * @param ref             The Firebase location to watch for data changes. Can also be a slice of a location,
+     *                        using some combination of {@code limit()}, {@code startAt()}, and {@code endAt()}.
      */
-    public FirebaseRecyclerAdapter(Query query,
-                                   @Nullable ArrayList<T> items,
-                                   @Nullable ArrayList<String> keys) {
-        this.mQuery = query;
-        if (items != null && keys != null) {
-            this.mItems = items;
-            this.mKeys = keys;
-        } else {
-            mItems = new ArrayList<T>();
-            mKeys = new ArrayList<String>();
-        }
-        query.addChildEventListener(mListener);
+    public FirebaseRecyclerAdapter(Class<T> modelClass,
+                                   int modelLayout,
+                                   Class<VH> viewHolderClass,
+                                   Query ref) {
+        this(modelClass, modelLayout, viewHolderClass, new FirebaseArray(ref));
     }
 
-    private ChildEventListener mListener = new ChildEventListener() {
-        @Override
-        public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-            String key = dataSnapshot.getKey();
-
-            if (!mKeys.contains(key)) {
-                T item = getConvertedObject(dataSnapshot);
-                int insertedPosition;
-                if (previousChildName == null) {
-                    mItems.add(0, item);
-                    mKeys.add(0, key);
-                    insertedPosition = 0;
-                } else {
-                    int previousIndex = mKeys.indexOf(previousChildName);
-                    int nextIndex = previousIndex + 1;
-                    if (nextIndex == mItems.size()) {
-                        mItems.add(item);
-                        mKeys.add(key);
-                    } else {
-                        mItems.add(nextIndex, item);
-                        mKeys.add(nextIndex, key);
-                    }
-                    insertedPosition = nextIndex;
-                }
-                notifyItemInserted(insertedPosition);
-                itemAdded(item, key, insertedPosition);
-            }
-        }
-
-        @Override
-        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            String key = dataSnapshot.getKey();
-
-            if (mKeys.contains(key)) {
-                int index = mKeys.indexOf(key);
-                T oldItem = mItems.get(index);
-                T newItem = getConvertedObject(dataSnapshot);
-
-                mItems.set(index, newItem);
-
-                notifyItemChanged(index);
-                itemChanged(oldItem, newItem, key, index);
-            }
-        }
-
-        @Override
-        public void onChildRemoved(DataSnapshot dataSnapshot) {
-            String key = dataSnapshot.getKey();
-
-            if (mKeys.contains(key)) {
-                int index = mKeys.indexOf(key);
-                T item = mItems.get(index);
-
-                mKeys.remove(index);
-                mItems.remove(index);
-
-                notifyItemRemoved(index);
-                itemRemoved(item, key, index);
-            }
-        }
-
-        @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-            String key = dataSnapshot.getKey();
-
-            int index = mKeys.indexOf(key);
-            T item = getConvertedObject(dataSnapshot);
-            mItems.remove(index);
-            mKeys.remove(index);
-            int newPosition;
-            if (previousChildName == null) {
-                mItems.add(0, item);
-                mKeys.add(0, key);
-                newPosition = 0;
-            } else {
-                int previousIndex = mKeys.indexOf(previousChildName);
-                int nextIndex = previousIndex + 1;
-                if (nextIndex == mItems.size()) {
-                    mItems.add(item);
-                    mKeys.add(key);
-                } else {
-                    mItems.add(nextIndex, item);
-                    mKeys.add(nextIndex, key);
-                }
-                newPosition = nextIndex;
-            }
-            notifyItemMoved(index, newPosition);
-            itemMoved(item, key, index, newPosition);
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-            Log.e("FirebaseListAdapter", "Listen was cancelled, no more updates will occur.");
-        }
-
-    };
-
-    @Override
-    public abstract ViewHolder onCreateViewHolder(ViewGroup parent, int viewType);
-
-    @Override
-    public abstract void onBindViewHolder(ViewHolder holder, final int position);
+    public void cleanup() {
+        mSnapshots.cleanup();
+    }
 
     @Override
     public int getItemCount() {
-        return (mItems != null) ? mItems.size() : 0;
+        return mSnapshots.getCount();
     }
 
-    /**
-     * Clean the adapter.
-     * ALWAYS call this method before destroying the adapter to remove the listener.
-     */
-    public void destroy() {
-        mQuery.removeEventListener(mListener);
-    }
-
-    /**
-     * Returns the list of items of the adapter: can be useful when dealing with a configuration
-     * change (e.g.: a device rotation).
-     * Just save this list before destroying the adapter and pass it to the new adapter (in the
-     * constructor).
-     *
-     * @return the list of items of the adapter
-     */
-    public ArrayList<T> getItems() {
-        return mItems;
-    }
-
-    /**
-     * Returns the list of keys of the items of the adapter: can be useful when dealing with a
-     * configuration change (e.g.: a device rotation).
-     * Just save this list before destroying the adapter and pass it to the new adapter (in the
-     * constructor).
-     *
-     * @return the list of keys of the items of the adapter
-     */
-    public ArrayList<String> getKeys() {
-        return mKeys;
-    }
-
-    /**
-     * Returns the item in the specified position
-     *
-     * @param position Position of the item in the adapter
-     * @return the item
-     */
     public T getItem(int position) {
-        return mItems.get(position);
+        return parseSnapshot(mSnapshots.getItem(position));
     }
 
     /**
-     * Returns the position of the item in the adapter
+     * This method parses the DataSnapshot into the requested type. You can override it in subclasses
+     * to do custom parsing.
      *
-     * @param item Item to be searched
-     * @return the position in the adapter if found, -1 otherwise
+     * @param snapshot the DataSnapshot to extract the model from
+     * @return the model extracted from the DataSnapshot
      */
-    public int getPositionForItem(T item) {
-        return mItems != null && mItems.size() > 0 ? mItems.indexOf(item) : -1;
+    protected T parseSnapshot(DataSnapshot snapshot) {
+        return snapshot.getValue(mModelClass);
+    }
+
+    public DatabaseReference getRef(int position) {
+        return mSnapshots.getItem(position).getRef();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        // http://stackoverflow.com/questions/5100071/whats-the-purpose-of-item-ids-in-android-listview-adapter
+        return mSnapshots.getItem(position).getKey().hashCode();
+    }
+
+    @Override
+    public VH onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
+        try {
+            Constructor<VH> constructor = mViewHolderClass.getConstructor(View.class);
+            return constructor.newInstance(view);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(VH viewHolder, int position) {
+        T model = getItem(position);
+        populateViewHolder(viewHolder, model, position);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return mModelLayout;
     }
 
     /**
-     * Check if the searched item is in the adapter
+     * @see ChangeEventListener#onChildChanged(ChangeEventListener.EventType, int, int)
+     */
+    protected void onChildChanged(ChangeEventListener.EventType type, int index, int oldIndex) {
+        switch (type) {
+            case ADDED:
+                notifyItemInserted(index);
+                break;
+            case CHANGED:
+                notifyItemChanged(index);
+                break;
+            case REMOVED:
+                notifyItemRemoved(index);
+                break;
+            case MOVED:
+                notifyItemMoved(oldIndex, index);
+                break;
+            default:
+                throw new IllegalStateException("Incomplete case statement");
+        }
+    }
+
+    /**
+     * @see ChangeEventListener#onDataChanged()
+     */
+    protected void onDataChanged() {
+    }
+
+    /**
+     * @see ChangeEventListener#onCancelled(DatabaseError)
+     */
+    protected void onCancelled(DatabaseError error) {
+        Log.w(TAG, error.toException());
+    }
+
+    /**
+     * Each time the data at the given Firebase location changes,
+     * this method will be called for each item that needs to be displayed.
+     * The first two arguments correspond to the mLayout and mModelClass given to the constructor of
+     * this class. The third argument is the item's position in the list.
+     * <p>
+     * Your implementation should populate the view using the data contained in the model.
      *
-     * @param item Item to be searched
-     * @return true if the item is in the adapter, false otherwise
+     * @param viewHolder The view to populate
+     * @param model      The object containing the data used to populate the view
+     * @param position   The position in the list of the view being populated
      */
-    public boolean contains(T item) {
-        return mItems != null && mItems.contains(item);
-    }
-
-    /**
-     * ABSTRACT METHODS THAT MUST BE IMPLEMENTED BY THE EXTENDING ADAPTER.
-     */
-
-    /**
-     * Called after an item has been added to the adapter
-     *
-     * @param item     Added item
-     * @param key      Key of the added item
-     * @param position Position of the added item in the adapter
-     */
-    protected void itemAdded(T item, String key, int position) {
-
-    }
-
-    /**
-     * Called after an item changed
-     *
-     * @param oldItem  Old version of the changed item
-     * @param newItem  Current version of the changed item
-     * @param key      Key of the changed item
-     * @param position Position of the changed item in the adapter
-     */
-    protected void itemChanged(T oldItem, T newItem, String key, int position) {
-
-    }
-
-    /**
-     * Called after an item has been removed from the adapter
-     *
-     * @param item     Removed item
-     * @param key      Key of the removed item
-     * @param position Position of the removed item in the adapter
-     */
-    protected void itemRemoved(T item, String key, int position) {
-
-    }
-
-    /**
-     * Called after an item changed position
-     *
-     * @param item        Moved item
-     * @param key         Key of the moved item
-     * @param oldPosition Old position of the changed item in the adapter
-     * @param newPosition New position of the changed item in the adapter
-     */
-    protected void itemMoved(T item, String key, int oldPosition, int newPosition) {
-
-    }
-
-    /**
-     * Converts the data snapshot to generic object
-     *
-     * @param snapshot Result
-     * @return Data converted
-     */
-    protected T getConvertedObject(DataSnapshot snapshot) {
-        return snapshot.getValue(getGenericClass());
-    }
-
-    /**
-     * Returns a class reference from generic T.
-     */
-    @SuppressWarnings("unchecked")
-    private Class<T> getGenericClass() {
-        return (Class<T>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[1];
-    }
-
+    protected abstract void populateViewHolder(VH viewHolder, T model, int position);
 }

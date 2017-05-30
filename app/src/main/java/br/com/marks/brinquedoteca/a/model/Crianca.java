@@ -1,9 +1,12 @@
 package br.com.marks.brinquedoteca.a.model;
 
+import org.parceler.Parcel;
+
 /**
  * Created by Gabriel on 18/05/2017.
  */
 
+@Parcel
 public class Crianca {
 
     //Basic
@@ -14,4 +17,6 @@ public class Crianca {
     //IMGUR
     public String urlImagem;
     public String urlHash;
+
+    public String nomeResponsavel;
 }
