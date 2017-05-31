@@ -5,9 +5,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +31,7 @@ import org.parceler.Parcels;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import br.com.marks.brinquedoteca.R;
 import br.com.marks.brinquedoteca.a.adapter.CriancasAdapterFirebase;
@@ -52,6 +55,11 @@ public class TelaCriancasFragment extends Fragment {
     private ArrayList<Crianca> mAdapterItems;
     private ArrayList<String> mAdapterKeys;
 
+    private GridLayoutManager glm;
+
+    final FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private DatabaseReference mChildrenRef;
+
     private FirebaseRecyclerAdapter mRecyclerAdapter;
 
     public TelaCriancasFragment() {
@@ -62,10 +70,8 @@ public class TelaCriancasFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-
         View v = inflater.inflate(R.layout.fragment_tela_criancas, container, false);
-
+        mChildrenRef = database.getReference("criancas");
         context = getContext();
 
         handleInstanceState(savedInstanceState);
@@ -81,13 +87,10 @@ public class TelaCriancasFragment extends Fragment {
 
         setupFirebaseAdapter();
 
-
-
         return v;
     }
 
     private void insereItem(){
-        final FirebaseDatabase database = FirebaseDatabase.getInstance();
         String key = database.getReference()
                 .child("criancas").push().getKey();;
 
@@ -111,19 +114,39 @@ public class TelaCriancasFragment extends Fragment {
     private void setupFirebaseAdapter(){
         rv_children.setHasFixedSize(true);
 
-        GridLayoutManager glm = new GridLayoutManager(getActivity(),5);
+        glm = new GridLayoutManager(getActivity(),5);
         glm.setOrientation(GridLayoutManager.VERTICAL);
         rv_children.setLayoutManager(glm);
 
-        mRecyclerAdapter = new FirebaseRecyclerAdapter<Crianca,ViewHolder>(Crianca.class,R.layout.item_crianca,ViewHolder.class,mRef){
+        Query lastFifty = mChildrenRef.limitToLast(50);
+
+        mRecyclerAdapter = new FirebaseRecyclerAdapter<Crianca,ViewHolder>(Crianca.class,R.layout.item_crianca,ViewHolder.class,lastFifty){
             @Override
             protected void populateViewHolder(ViewHolder viewHolder, Crianca model, int position) {
-                Picasso.with(getContext()).load(model.urlImagem).into(viewHolder.iv_foto);
-                viewHolder.tv_idade_crianca.setText(model.idade);
-                viewHolder.tv_nome_crianca.setText(model.nome);
-                viewHolder.tv_nome_responsavel.setText(model.nomeResponsavel);
+                    viewHolder.tv_idade_crianca.setText(String.format("%s",model.idade));
+                    viewHolder.tv_nome_crianca.setText(model.nome);
+
+                //Picasso.with(getContext()).load(model.urlImagem).into(viewHolder.iv_foto);
+                //viewHolder.tv_nome_responsavel.setText(model.nomeResponsavel);
             }
         };
+
+        rv_children.setAdapter(mRecyclerAdapter);
+
+        mRecyclerAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                glm.smoothScrollToPosition(rv_children,null,mRecyclerAdapter.getItemCount());
+            }
+        });
+
+        ViewHolder.setBtnClickListener(new ViewHolder.MyClickListener() {
+            @Override
+            public void onItemClick(int position, View v) {
+                Toast.makeText(context, "Position: "+position, Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     private void handleInstanceState(Bundle savedInstanceState) {
@@ -140,7 +163,9 @@ public class TelaCriancasFragment extends Fragment {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
+        static MyClickListener btnClickListener;
         ImageView iv_foto;
+        CardView cv_item;
         TextView tv_nome_crianca;
         TextView tv_idade_crianca;
         TextView tv_nome_responsavel;
@@ -151,7 +176,32 @@ public class TelaCriancasFragment extends Fragment {
             tv_nome_crianca = (TextView) view.findViewById(R.id.tv_nome_crianca);
             tv_idade_crianca = (TextView) view.findViewById(R.id.tv_idade_crianca);
             tv_nome_responsavel = (TextView) view.findViewById(R.id.tv_nome_responsavel);
+            cv_item =(CardView) view.findViewById(R.id.cv_item);
+
+            cv_item.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    btnClickListener.onItemClick(getAdapterPosition(),v);
+                }
+            });
         }
+
+        public static void setBtnClickListener(MyClickListener btnClickListener) {
+            ViewHolder.btnClickListener = btnClickListener;
+        }
+
+        public void setTv_nome_crianca(String nome){
+            tv_nome_crianca.setText(nome);
+        }
+
+        public void setTv_idade_crianca(String idade_crianca){
+            tv_idade_crianca.setText(idade_crianca);
+        }
+
+        public interface MyClickListener {
+            void onItemClick(int position, View v);
+        }
+
 
     }
 
