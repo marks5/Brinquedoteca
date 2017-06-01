@@ -190,18 +190,9 @@ public class TelaCriancasFragment extends Fragment {
             ViewHolder.btnClickListener = btnClickListener;
         }
 
-        public void setTv_nome_crianca(String nome){
-            tv_nome_crianca.setText(nome);
-        }
-
-        public void setTv_idade_crianca(String idade_crianca){
-            tv_idade_crianca.setText(idade_crianca);
-        }
-
         public interface MyClickListener {
             void onItemClick(int position, View v);
         }
-
 
     }
 
