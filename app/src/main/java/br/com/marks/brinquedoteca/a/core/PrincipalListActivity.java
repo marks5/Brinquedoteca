@@ -81,7 +81,7 @@ public class PrincipalListActivity extends AppCompatActivity {
                                     .commit();
                         } else {
                             Intent intent = new Intent(context, TelaCriancasActivity.class);
-                            context.startActivity(intent);
+                            startActivity(intent);
                         }
                         break;
                     case R.id.contato:

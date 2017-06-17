@@ -6,7 +6,5 @@ package br.com.marks.brinquedoteca.a.adapter;
 
 public class CriancasAdapterFirebase  {
 
-
-
 }
 

@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import br.com.marks.brinquedoteca.R;
+import br.com.marks.brinquedoteca.a.adapter.CriancasAdapter;
 import br.com.marks.brinquedoteca.a.adapter.CriancasAdapterFirebase;
 import br.com.marks.brinquedoteca.a.model.Crianca;
 
@@ -60,7 +61,7 @@ public class TelaCriancasFragment extends Fragment {
     final FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference mChildrenRef;
 
-    private FirebaseRecyclerAdapter mRecyclerAdapter;
+    private CriancasAdapter mRecyclerAdapter;
 
     public TelaCriancasFragment() {
         // Required empty public constructor
@@ -120,30 +121,14 @@ public class TelaCriancasFragment extends Fragment {
 
         Query lastFifty = mChildrenRef.limitToLast(50);
 
-        mRecyclerAdapter = new FirebaseRecyclerAdapter<Crianca,ViewHolder>(Crianca.class,R.layout.item_crianca,ViewHolder.class,lastFifty){
-            @Override
-            protected void populateViewHolder(ViewHolder viewHolder, Crianca model, int position) {
-                    viewHolder.tv_idade_crianca.setText(String.format("%s",model.idade));
-                    viewHolder.tv_nome_crianca.setText(model.nome);
-
-                //Picasso.with(getContext()).load(model.urlImagem).into(viewHolder.iv_foto);
-                //viewHolder.tv_nome_responsavel.setText(model.nomeResponsavel);
-            }
-        };
+        mRecyclerAdapter = new CriancasAdapter(lastFifty);
 
         rv_children.setAdapter(mRecyclerAdapter);
 
-        mRecyclerAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                glm.smoothScrollToPosition(rv_children,null,mRecyclerAdapter.getItemCount());
-            }
-        });
-
-        ViewHolder.setBtnClickListener(new ViewHolder.MyClickListener() {
+        mRecyclerAdapter.setBtnClickListener(new CriancasAdapter.MyClickListener() {
             @Override
             public void onItemClick(int position, View v) {
-                Toast.makeText(context, "Position: "+position, Toast.LENGTH_SHORT).show();
+
             }
         });
 
@@ -161,39 +146,6 @@ public class TelaCriancasFragment extends Fragment {
         }
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        static MyClickListener btnClickListener;
-        ImageView iv_foto;
-        CardView cv_item;
-        TextView tv_nome_crianca;
-        TextView tv_idade_crianca;
-        TextView tv_nome_responsavel;
-
-        public ViewHolder(View view) {
-            super(view);
-            iv_foto = (ImageView) view.findViewById(R.id.iv_foto);
-            tv_nome_crianca = (TextView) view.findViewById(R.id.tv_nome_crianca);
-            tv_idade_crianca = (TextView) view.findViewById(R.id.tv_idade_crianca);
-            tv_nome_responsavel = (TextView) view.findViewById(R.id.tv_nome_responsavel);
-            cv_item =(CardView) view.findViewById(R.id.cv_item);
-
-            cv_item.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    btnClickListener.onItemClick(getAdapterPosition(),v);
-                }
-            });
-        }
-
-        public static void setBtnClickListener(MyClickListener btnClickListener) {
-            ViewHolder.btnClickListener = btnClickListener;
-        }
-
-        public interface MyClickListener {
-            void onItemClick(int position, View v);
-        }
-
-    }
 
 }
