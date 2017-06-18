@@ -1,12 +1,14 @@
 package br.com.marks.brinquedoteca.a.activity;
 
 import android.content.Context;
+import android.media.Image;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -62,12 +64,22 @@ public class TelaCriancasActivity extends AppCompatActivity {
 
     private CriancasAdapter mRecyclerAdapter;
 
+    private ImageView btn_back;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_criancas);
 
         mChildrenRef = database.getReference("criancas");
+
+        btn_back = (ImageView) findViewById(R.id.arrow_back);
+        btn_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
         handleInstanceState(savedInstanceState);
         edt_search =(EditText) findViewById(R.id.edt_search);
