@@ -41,6 +41,7 @@ public class PrincipalListActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if(toolbar!=null) {
             toolbar.setTitle(getTitle());
+            toolbar.setNavigationIcon(R.drawable.ic_dehaze);
         }
 
         context = getApplicationContext();
@@ -48,6 +49,13 @@ public class PrincipalListActivity extends AppCompatActivity {
         if (findViewById(R.id.principal_detail_container) != null) {
             mTwoPane = true;
         }
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawerLayout.openDrawer(navigationView);
+            }
+        });
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
