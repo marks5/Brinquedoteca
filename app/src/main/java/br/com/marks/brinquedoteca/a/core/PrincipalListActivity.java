@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -28,6 +29,8 @@ public class PrincipalListActivity extends AppCompatActivity {
 
     private boolean mTwoPane;
     private Context context;
+    private NavigationView navigationView;
+    private DrawerLayout drawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,10 +49,13 @@ public class PrincipalListActivity extends AppCompatActivity {
             mTwoPane = true;
         }
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        navigationView = (NavigationView) findViewById(R.id.navigation_view);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                item.setChecked(true);
                 switch (item.getItemId()){
                     case R.id.menu_inicio:
                         if (mTwoPane) {
@@ -107,6 +113,7 @@ public class PrincipalListActivity extends AppCompatActivity {
                         }
                         break;
                 }
+                drawerLayout.closeDrawer(navigationView);
             return false;
             }
         });

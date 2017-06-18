@@ -89,7 +89,6 @@ public class TelaCriancasActivity extends AppCompatActivity {
                                 public void run() {
                                     if(edt_search.getText().length()>0){
                                         String busca = edt_search.getText().toString();
-                                        Log.i("Produto_buscado",busca);
                                         performarBusca(busca);
                                     }else{
                                         setupFirebaseAdapter();

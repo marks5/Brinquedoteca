@@ -19,7 +19,8 @@
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:theme="@style/AppTheme.AppBarOverlay"
+        >
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -46,11 +47,14 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/navigation_view"
         android:name="br.com.marks.brinquedoteca.activity.PrincipalListFragment"
-        android:layout_width="@dimen/item_width"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         app:layoutManager="LinearLayoutManager"
         tools:context="br.com.marks.brinquedoteca.a.core.PrincipalListActivity"
         app:menu="@menu/menu_brinquedoteca"
-        app:headerLayout="@layout/layout_header_brinquedoteca"/>
+        app:headerLayout="@layout/layout_header_brinquedoteca"
+        app:itemTextColor="@color/colorLine"
+        app:itemBackground="@drawable/item_background"
+        />
 
 </android.support.v4.widget.DrawerLayout>
