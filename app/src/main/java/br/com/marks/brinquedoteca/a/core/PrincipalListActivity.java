@@ -12,6 +12,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 import br.com.marks.brinquedoteca.R;
 import br.com.marks.brinquedoteca.a.activity.TelaContatoActivity;
@@ -32,6 +36,9 @@ public class PrincipalListActivity extends AppCompatActivity {
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
 
+    private TextView tv_usuario;
+    private TextView tv_logout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +50,8 @@ public class PrincipalListActivity extends AppCompatActivity {
             toolbar.setTitle(getTitle());
             toolbar.setNavigationIcon(R.drawable.ic_dehaze);
         }
+
+
 
         context = getApplicationContext();
 
@@ -126,6 +135,31 @@ public class PrincipalListActivity extends AppCompatActivity {
             }
         });
 
+        loadData();
+
+    }
+
+    private void loadData(){
+        tv_usuario = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tv_usuario);
+        tv_logout = (TextView) navigationView.getHeaderView(0).findViewById(R.id.tv_logout);
+
+        String usuario = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+
+        tv_usuario.setText(usuario);
+
+        tv_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FirebaseAuth.getInstance().signOut();
+                telaLogin();
+            }
+        });
+    }
+
+    private void telaLogin(){
+        finish();
+        Intent login = new Intent(this, Login.class);
+        startActivity(login);
     }
 
 

@@ -180,6 +180,7 @@ public class Login extends AppCompatActivity{
                         }else{
                             Toast.makeText(Login.this, "E-mail ou senha inválidos!", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "Senha ou e-mail inválidos!");
+                            showProgress(false);
                         }
                     }
                 });
