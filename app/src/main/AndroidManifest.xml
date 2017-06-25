@@ -9,12 +9,12 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
-        tools:replace="android:supportsRtl"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:supportsRtl">
         <activity android:name=".a.core.Login">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,9 +24,9 @@
         </activity>
         <activity
             android:name=".a.core.PrincipalListActivity"
+            android:icon="@drawable/ic_dehaze"
             android:label="@string/principais_noticiais"
-            android:theme="@style/AppTheme"
-            android:icon="@drawable/ic_dehaze"/>
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".a.core.PrincipalDetailActivity"
             android:label="@string/principais_noticiais"
@@ -40,7 +40,8 @@
         <activity android:name=".a.activity.TelaPerfilActivity" />
         <activity android:name=".a.activity.TelaCriancasActivity" />
         <activity android:name=".a.activity.TelaContatoActivity" />
-        <activity android:name=".a.activity.TelaSobreActivity"></activity>
+        <activity android:name=".a.activity.TelaSobreActivity" />
+        <activity android:name=".a.activity.TelaAdicionarCrianca"></activity>
     </application>
 
 </manifest>

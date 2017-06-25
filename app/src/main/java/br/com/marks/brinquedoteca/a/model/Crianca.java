@@ -1,24 +1,23 @@
 package br.com.marks.brinquedoteca.a.model;
 
-import org.parceler.Parcel;
+
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Created by Gabriel on 18/05/2017.
  */
+public class Crianca implements Parcelable {
 
-@Parcel
-public class Crianca {
-
-    //Basic
-    public String nome; //Nome Completo
-    public Integer idade; //Numericos simples: 5/6/7/8 anos
+    public String nome;
+    public Integer idade;
     public String identidade;
-
-    //IMGUR
     public String urlImagem;
     public String urlHash;
-
     public String nomeResponsavel;
+
+    public Crianca() {
+    }
 
     public String getNome() {
         return nome;
@@ -68,15 +67,45 @@ public class Crianca {
         this.nomeResponsavel = nomeResponsavel;
     }
 
-    @Override
-    public String toString() {
-        return "Crianca{" +
-                "nome='" + nome + '\'' +
-                ", idade=" + idade +
-                ", identidade='" + identidade + '\'' +
-                ", urlImagem='" + urlImagem + '\'' +
-                ", urlHash='" + urlHash + '\'' +
-                ", nomeResponsavel='" + nomeResponsavel + '\'' +
-                '}';
+    protected Crianca(Parcel in) {
+        nome = in.readString();
+        idade = in.readByte() == 0x00 ? null : in.readInt();
+        identidade = in.readString();
+        urlImagem = in.readString();
+        urlHash = in.readString();
+        nomeResponsavel = in.readString();
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(nome);
+        if (idade == null) {
+            parcel.writeByte((byte) (0x00));
+        } else {
+            parcel.writeByte((byte) (0x01));
+            parcel.writeInt(idade);
+        }
+        parcel.writeString(identidade);
+        parcel.writeString(urlImagem);
+        parcel.writeString(urlHash);
+        parcel.writeString(nomeResponsavel);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<Crianca> CREATOR = new Parcelable.Creator<Crianca>() {
+        @Override
+        public Crianca createFromParcel(Parcel in) {
+            return new Crianca(in);
+        }
+
+        @Override
+        public Crianca[] newArray(int size) {
+            return new Crianca[size];
+        }
+    };
 }
